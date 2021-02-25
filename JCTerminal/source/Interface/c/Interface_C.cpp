@@ -5,13 +5,28 @@
 #include "Settings/Settings.h"
 #include "Callback/Callback.h"
 #include "Terminal/Terminal.h"
+#include "Window/Window.h"
+#include "Text/FontList.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <cassert>
+#include <array>
+#include <numeric>
 
-jcTerminal* jcTerminal_open(int _widthCells, int _heightCells, const char* _title)
+namespace
+{
+	constexpr auto DEFAULT_FONT_SIZES_V = []() -> std::array<int, 6>
+	{
+		std::array<int, 6> _out{};
+		_out[0] = 8;
+		std::iota(_out.begin(), _out.end(), 6);
+		return _out;
+	}();
+};
+
+jcTerminal* jcTerminalOpen(int _widthCells, int _heightCells, const char* _title)
 {
 	auto _res = glfwInit();
 	assert(_res == 1);
@@ -24,28 +39,40 @@ jcTerminal* jcTerminal_open(int _widthCells, int _heightCells, const char* _titl
 	_st.cells_y = _heightCells;
 	_st.title = _title;
 
-	auto& _window = _terminal->window();
-	_window = glfwCreateWindow(_st.cell_width * _st.cells_x, _st.cell_height * _st.cell_height, _st.title.c_str(), NULL, NULL);
-	assert(_window);
+	auto _result = jct::open_terminal_window(_terminal);
+	assert(_result);
 
+	auto& _window = _terminal->window();
+	assert(_window);
 	glfwMakeContextCurrent(_window);
+	
 	_res = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	assert(_res == 1);
 
+	auto& _cellBuffer = _terminal->cell_buffer();
+	_cellBuffer.resize(_st.cells_x, _st.cells_y);
+	auto _goodInit = _cellBuffer.initialize();
+	assert(_goodInit);
+
 	return _terminal;
 };
-void jcTerminal_refresh(jcTerminal* _terminal)
+void jcTerminalRefresh(jcTerminal* _terminal)
 {
 	assert(_terminal);
 
 	auto& _window = _terminal->window();
 	assert(_window);
 
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	auto& _cellBuffer = _terminal->cell_buffer();
+	_cellBuffer.draw();
+
 	glfwSwapBuffers(_window);
 	glfwPollEvents();
 
 };
-void jcTerminal_close(jcTerminal** _terminalPtr)
+void jcTerminalClose(jcTerminal** _terminalPtr)
 {
 	if (_terminalPtr && *_terminalPtr)
 	{
@@ -63,39 +90,98 @@ void jcTerminal_close(jcTerminal** _terminalPtr)
 	};
 };
 
-void jcTerminal_getCellSize(jcTerminal* _terminal, int* _width, int* _height)
+void jcTerminalGetCellSize(jcTerminal* _terminal, int* _width, int* _height)
 {
 	assert(_terminal);
 	auto& _st = _terminal->settings();
 	*_width = _st.cell_width;
 	*_height = _st.cell_height;
 };
-void jcTerminal_setCellSize(jcTerminal* _terminal, int _width, int _height)
+void jcTerminalSetCellSize(jcTerminal* _terminal, int _width, int _height)
 {
 	assert(_terminal);
 	auto& _st = _terminal->settings();
 	_st.cell_width = _width;
 	_st.cell_height = _height;
+	jct::refresh_window_size(_terminal);
 };
 
-void jcTerminal_getWindowSize(jcTerminal* _terminal, int* _widthCells, int* _heightCells)
+void jcTerminalGetWindowSize(jcTerminal* _terminal, int* _widthCells, int* _heightCells)
 {
 	assert(_terminal);
 	auto& _st = _terminal->settings();
 	*_widthCells = _st.cells_x;
 	*_heightCells = _st.cells_y;
 };
-void jcTerminal_setWindowSize(jcTerminal* _terminal, int _widthCells, int _heightCells)
+void jcTerminalSetWindowSize(jcTerminal* _terminal, int _widthCells, int _heightCells)
 {
 	assert(_terminal);
 	auto& _st = _terminal->settings();
 	_st.cells_x = _widthCells;
 	_st.cells_y = _heightCells;
+
+	auto& _cellBuffer = _terminal->cell_buffer();
+	_cellBuffer.resize(_st.cells_x, _st.cells_y);
+
+	jct::refresh_window_size(_terminal);
 };
 
-void jcTerminal_setCloseCallback(jcTerminal* _terminal, jcTerminal_CloseCallback _callback)
+
+
+int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath)
+{
+	assert(_terminal);
+	auto& _fonts = _terminal->fonts();
+
+	jct::FontPath _path{ _fontPath };
+	constexpr auto _fontSizes = DEFAULT_FONT_SIZES_V;
+	auto _fontIndex = jct::load_font_from_disk(_path, _fontSizes.data(), _fontSizes.data() + _fontSizes.size());
+	return _fontIndex;
+};
+
+
+
+
+
+
+
+void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, ColorRGBA _color)
+{
+	assert(_terminal);
+	auto& _cellBuffer = _terminal->cell_buffer();
+	auto& _cell = _cellBuffer.at((uint16_t)_x, (uint16_t)_y);
+
+	auto& _col = _cell.foreground; 
+	_col.r = _color.r;
+	_col.g = _color.g;
+	_col.b = _color.b;
+	_col.a = _color.a;
+
+	_cellBuffer.update();
+};
+
+
+
+
+
+
+
+
+
+
+
+void jcTerminalSetCloseCallback(jcTerminal* _terminal, jcTerminal_CloseCallback _callback)
 {
 	assert(_terminal);
 	auto& _cbl = _terminal->callbacks();
 	_cbl.close_callback = _callback;
 };
+void jcTerminalKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback)
+{
+	assert(_terminal);
+	auto& _cb = _terminal->callbacks();
+	_cb.key_callback = _callback;
+};
+
+
+

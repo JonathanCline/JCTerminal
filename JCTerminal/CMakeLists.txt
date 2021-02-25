@@ -34,6 +34,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	
 	
 add_subdirectory("source/Callback")
+add_subdirectory("source/CellBuffer")
+add_subdirectory("source/Color")
 add_subdirectory("source/Interface")
 add_subdirectory("source/Settings")
 add_subdirectory("source/Terminal")
