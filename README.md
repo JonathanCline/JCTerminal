@@ -2,8 +2,9 @@
 
 # Dependencies
 
-glfw
-glad
-glm
-freetype
-SAELib
+- glfw 
+- glad 
+- glm 
+- freetype 
+- SAELib 
+ 
