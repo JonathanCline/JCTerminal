@@ -1,5 +1,5 @@
 
-#include <JCTerminal.h>
+#include <c/JCTerminal.h>
 
 #include <SAELib_Timer.h>
 
@@ -8,7 +8,7 @@
 
 int main()
 {
-	auto _result = jct::terminal_open(64, 24, "nosegay");
+	auto _result = jcTerminal_open(64, 24, "nosegay");
 	std::cout << (int)_result << '\n';
 
 	sae::timer _timer{ std::chrono::seconds{5} };
@@ -16,11 +16,11 @@ int main()
 
 	while (!_timer.finished())
 	{
-		jct::terminal_refresh();
+		jcTerminal_refresh();
 		
 	};
 
-	jct::terminal_close();
+	jcTerminal_close();
 	
 	return 0;
 };
