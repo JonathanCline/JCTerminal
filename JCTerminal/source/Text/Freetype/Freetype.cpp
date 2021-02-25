@@ -1,6 +1,6 @@
 #include "Freetype.h"
 
-namespace sf::client::text
+namespace jct::text
 {
 
 	FTLibWrapper::FTLibWrapper()

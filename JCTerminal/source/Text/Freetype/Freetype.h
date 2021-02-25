@@ -7,7 +7,7 @@
 
 #include <optional>
 
-namespace sf::client::text
+namespace jct::text
 {
 	class FTLibWrapper
 	{

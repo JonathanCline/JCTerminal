@@ -3,8 +3,6 @@
 #include "TextUnits.h"
 #include "Glyph.h"
 
-#include "Texture/Texture.h"
-
 #include <SAELib_Invariant.h>
 #include <SAELib_Decorator.h>
 #include <SAELib_Utility.h>
@@ -17,10 +15,10 @@
 #include <algorithm>
 #include <filesystem>
 #include <string>
+#include <optional>
 
-namespace sf::client::text
+namespace jct::text
 {
-
 	struct TypeFaceMetrics
 	{
 		frac26_pixels ascender = 0_fpx26;

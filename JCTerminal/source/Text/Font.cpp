@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-namespace sf::client::text
+namespace jct::text
 {
 	namespace
 	{
@@ -41,7 +41,7 @@ namespace sf::client::text
 			return _out;
 		};
 
-		std::optional<Glyph_Texture> make_glyph_texture(const FT_Face& _face)
+		std::optional<GlyphTexture> make_glyph_texture(const FT_Face& _face)
 		{
 			auto _err = FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL);
 			if (_err) [[unlikely]]
@@ -49,20 +49,15 @@ namespace sf::client::text
 				return std::nullopt;
 			};
 
-			const auto _width = (Texture<R_8>::size_type)_face->glyph->bitmap.width;
-			const auto _height = (Texture<R_8>::size_type)_face->glyph->bitmap.rows;
+			const auto _width = (GlyphTexture::size_type)_face->glyph->bitmap.width;
+			const auto _height = (GlyphTexture::size_type)_face->glyph->bitmap.rows;
 			const auto _begin = _face->glyph->bitmap.buffer;
 			const auto _end = _begin + (_width * _height);
 
-			Glyph_Texture _out{};
-			_out.resize(_width, _height, Texel<R_8>{ 0 });
+			GlyphTexture _out{};
+			_out.resize(_width, _height, GlyphTexture::value_type{});
 			auto _texIter = _out.begin();
-
-			for (auto p = _begin; p != _end; ++p)
-			{
-				_texIter->r = *p;
-				++_texIter;
-			};
+			std::copy(_begin, _end, _texIter);
 
 			return _out;
 		};
@@ -186,7 +181,7 @@ namespace sf::client::text
 
 };
 
-namespace sf::client::text
+namespace jct::text
 {
 
 	void TypeFace::insert(Glyph _glyph)

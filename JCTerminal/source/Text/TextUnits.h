@@ -5,9 +5,8 @@
 
 #include <cstdint>
 
-namespace sf::client::text
+namespace jct::text
 {
-
 
 	using font_units = sae::IntegralInvariant<int32_t, struct FontUnitsTag>;
 
