@@ -136,7 +136,7 @@ namespace jct::text
 		const_reference operator[](character_type _char) const;
 
 	private:
-		TypeFaceMetrics size_metrics_{};		
+		TypeFaceMetrics size_metrics_{};
 		container_type glyphs_{};
 
 	};

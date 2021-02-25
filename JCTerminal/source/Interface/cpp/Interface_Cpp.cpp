@@ -2,50 +2,52 @@
 
 #include "cpp/JCTerminal.hpp"
 
+
+
 namespace jct
 {
 
-	int open(int _cellsX, int _cellsY, const char* _title)
+	jcTerminal* open(int _cellsX, int _cellsY, const char* _title)
 	{
-		return jcTerminal_open(_cellsX, _cellsY, _title);
+		return jcTerminalOpen(_cellsX, _cellsY, _title);
 	};
-	void refresh()
+	void refresh(jcTerminal* _terminal)
 	{
-		jcTerminal_refresh();
+		jcTerminalRefresh(_terminal);
 	};
-	void close()
+	void close(jcTerminal*& _terminal)
 	{
-		jcTerminal_close();
+		jcTerminalClose(&_terminal);
 	};
 
-	CellSize getCellSize()
+	CellSize getCellSize(jcTerminal* _terminal)
 	{
 		CellSize _csize{};
-		jcTerminal_getCellSize(&_csize.width, &_csize.height);
+		jcTerminalGetCellSize(_terminal, &_csize.width, &_csize.height);
 		return _csize;
 	};
-	void setCellSize(CellSize _csize)
+	void setCellSize(jcTerminal* _terminal, CellSize _csize)
 	{
-		setCellSize(_csize.width, _csize.height);
+		setCellSize(_terminal, _csize.width, _csize.height);
 	};
-	void setCellSize(int _width, int _height)
+	void setCellSize(jcTerminal* _terminal, int _width, int _height)
 	{
-		jcTerminal_setCellSize(_width, _height);
+		jcTerminalSetCellSize(_terminal, _width, _height);
 	};
 
-	WindowSize getWindowSize()
+	WindowSize getWindowSize(jcTerminal* _terminal)
 	{
 		WindowSize _csize{};
-		jcTerminal_getWindowSize(&_csize.width, &_csize.height);
+		jcTerminalGetWindowSize(_terminal, &_csize.width, &_csize.height);
 		return _csize;
 	};
-	void setWindowSize(int _widthCells, int _heightCells)
+	void setWindowSize(jcTerminal* _terminal, int _widthCells, int _heightCells)
 	{
-		jcTerminal_setWindowSize(_widthCells, _heightCells);
+		jcTerminalSetWindowSize(_terminal, _widthCells, _heightCells);
 	};
-	void setWindowSize(WindowSize _size)
+	void setWindowSize(jcTerminal* _terminal, WindowSize _size)
 	{
-		setWindowSize(_size.width, _size.height);
+		setWindowSize(_terminal, _size.width, _size.height);
 	};
 
 

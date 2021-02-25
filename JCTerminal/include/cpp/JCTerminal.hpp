@@ -2,11 +2,14 @@
 #ifndef JCTERMINAL_HPP
 #define JCTERMINAL_HPP
 
+struct jcTerminal;
+
 namespace jct
 {
-	int open(int _cellsX, int _cellsY, const char* _title);
-	void refresh();
-	void close();
+	jcTerminal* open(int _cellsX, int _cellsY, const char* _title);
+	void refresh(jcTerminal* _terminal);
+	void close(jcTerminal*& _terminal);
+
 
 	struct CellSize
 	{
@@ -14,9 +17,10 @@ namespace jct
 		int height;
 	};
 
-	CellSize getCellSize();
-	void setCellSize(CellSize _size);
-	void setCellSize(int _width, int _height);
+	CellSize getCellSize(jcTerminal* _terminal);
+	void setCellSize(jcTerminal* _terminal, CellSize _size);
+	void setCellSize(jcTerminal* _terminal, int _width, int _height);
+
 
 	struct WindowSize
 	{
@@ -24,9 +28,14 @@ namespace jct
 		int height;
 	};
 
-	WindowSize getWindowSize();
-	void setWindowSize(int _widthCells, int _heightCells);
-	void setWindowSize(WindowSize _size);
+	WindowSize getWindowSize(jcTerminal* _terminal);
+	void setWindowSize(jcTerminal* _terminal, int _widthCells, int _heightCells);
+	void setWindowSize(jcTerminal* _terminal, WindowSize _size);
+
+
+	
+
+
 
 };
 
