@@ -32,10 +32,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_STANDARD ${lib_cxx} 
 	CXX_STANDARD_REQUIRED True)
 	
-
-add_subdirectory("source/Text")
-add_subdirectory("source/Settings")
+	
+add_subdirectory("source/Callback")
 add_subdirectory("source/Interface")
+add_subdirectory("source/Settings")
+add_subdirectory("source/Terminal")
+add_subdirectory("source/Text")
+add_subdirectory("source/Window")
 
 
 

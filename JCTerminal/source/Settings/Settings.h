@@ -15,11 +15,4 @@ namespace jct
 
 		std::string title{};
 	};
-	
-	namespace impl
-	{
-		extern inline TerminalSettings TERMINAL_SETTINGS_V{};
-	};
-	TerminalSettings& terminal_settings() { return impl::TERMINAL_SETTINGS_V; };
-	
 };
