@@ -145,7 +145,7 @@ int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath)
 
 
 
-void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, ColorRGBA _color)
+void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color)
 {
 	assert(_terminal);
 	auto& _cellBuffer = _terminal->cell_buffer();
@@ -159,10 +159,81 @@ void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, ColorRGBA _color)
 
 	_cellBuffer.update();
 };
+jcTerminal_Color jcTerminalGetColor(jcTerminal* _terminal, int _x, int _y)
+{
+	assert(_terminal);
+	auto& _cellBuffer = _terminal->cell_buffer();
+	auto& _cell = _cellBuffer.at((uint16_t)_x, (uint16_t)_y);
+
+	jcTerminal_Color _col{};
+
+	auto& _color = _cell.foreground;
+	_col.r = _color.r;
+	_col.g = _color.g;
+	_col.b = _color.b;
+	_col.a = _color.a;
+
+	return _col;
+};
+
+void jcTerminalSetBackgroundColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color)
+{
+	assert(_terminal);
+	auto& _cellBuffer = _terminal->cell_buffer();
+	auto& _cell = _cellBuffer.at((uint16_t)_x, (uint16_t)_y);
+
+	auto& _col = _cell.background;
+	_col.r = _color.r;
+	_col.g = _color.g;
+	_col.b = _color.b;
+	_col.a = _color.a;
+
+	_cellBuffer.update();
+};
+jcTerminal_Color jcTerminalGetBackgroundColor(jcTerminal* _terminal, int _x, int _y)
+{
+	assert(_terminal);
+	auto& _cellBuffer = _terminal->cell_buffer();
+	auto& _cell = _cellBuffer.at((uint16_t)_x, (uint16_t)_y);
+
+	jcTerminal_Color _col{};
+
+	auto& _color = _cell.background;
+	_col.r = _color.r;
+	_col.g = _color.g;
+	_col.b = _color.b;
+	_col.a = _color.a;
+
+	return _col;
+};
 
 
 
 
+void jcTerminalFillRect(jcTerminal* _terminal, int _x0, int _y0, int _x1, int _y1, jcTerminal_Color _color)
+{
+	assert(_terminal);
+
+	if (_x0 > _x1) { std::swap(_x0, _x1); };
+	if (_y0 > _y1) { std::swap(_y0, _y1); };
+	
+	auto& _cb = _terminal->cell_buffer();
+	
+	for (auto x = _x0; x != _x1; ++x)
+	{
+		for (auto y = _y0; y != _y1; ++y)
+		{
+			auto& _col = _cb.at(x, y).foreground;
+			_col.r = _color.r;
+			_col.g = _color.g;
+			_col.b = _color.b;
+			_col.a = _color.a;
+		};
+	};
+
+	_cb.update();
+
+};
 
 
 

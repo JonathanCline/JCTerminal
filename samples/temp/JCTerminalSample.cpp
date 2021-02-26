@@ -18,8 +18,9 @@ const int screen_height = 32;
 int pos_x = 0;
 int pos_y = 0;
 
-const ColorRGBA default_color{ 255, 255, 255, 255 };
-const ColorRGBA square_color{ 255, 0, 0, 255 };
+const jcTerminal_Color default_color{ 255, 255, 255, 255 };
+const jcTerminal_Color square_color{ 255, 0, 0, 255 };
+const jcTerminal_Color dared_color{ 80, 10, 0, 255 };
 
 void tclose_callback(jcTerminal* _terminal)
 {
@@ -77,8 +78,13 @@ int main()
 
 	auto _hackIndex = jcTerminalLoadFont(_terminal, hack_font_path_v);
 
-	jcTerminalRefresh(_terminal);
 	jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
+	
+
+	jcTerminalFillRect(_terminal, 4, 4, 12, 16, dared_color);
+	jcTerminalRefresh(_terminal);
+
+
 
 	while (keep_refreshing_terminal_v)
 	{

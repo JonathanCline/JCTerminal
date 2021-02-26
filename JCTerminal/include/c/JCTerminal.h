@@ -21,17 +21,28 @@ extern "C"
 
 	int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath);
 	
+	
 
-
-	struct ColorRGBA
+	struct jcTerminal_Color
 	{
 		unsigned char r = 0;
 		unsigned char g = 0;
 		unsigned char b = 0;
-		unsigned char a = 0;
+		unsigned char a = 0;	
 	};
 
-	void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, ColorRGBA _color);
+	void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color);
+	jcTerminal_Color jcTerminalGetColor(jcTerminal* _terminal, int _x, int _y);
+
+	void jcTerminalSetBackgroundColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color);
+	jcTerminal_Color jcTerminalGetBackgroundColor(jcTerminal* _terminal, int _x, int _y);
+
+
+
+
+	void jcTerminalFillRect(jcTerminal* _terminal, int _x0, int _y0, int _x1, int _y1, jcTerminal_Color _color);
+
+
 
 
 
