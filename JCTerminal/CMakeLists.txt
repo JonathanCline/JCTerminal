@@ -40,8 +40,6 @@ add_subdirectory("source/Interface")
 add_subdirectory("source/Settings")
 add_subdirectory("source/Terminal")
 add_subdirectory("source/Text")
+add_subdirectory("source/Texture")
 add_subdirectory("source/Window")
-
-
-
 

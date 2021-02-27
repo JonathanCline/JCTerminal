@@ -7,6 +7,7 @@
 #include "Terminal/Terminal.h"
 #include "Window/Window.h"
 #include "Text/FontList.h"
+#include "Texture/TextureLoader.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -139,6 +140,25 @@ int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath)
 	return _fontIndex;
 };
 
+int jcTerminalLoadPNG(jcTerminal* _terminal, const char* _path, unsigned short _setIndex)
+{
+	const auto _fpath = std::filesystem::path{ _path };
+	const auto _isPNG = jct::is_png_file(_fpath);
+	if (!_isPNG) [[unlikely]]
+	{
+		return -1;
+	};
+
+	auto _texOpt = jct::load_texture_png(_fpath);
+	if (!_texOpt) [[unlikely]]
+	{
+		return -2;
+	};
+
+
+
+	return 0;
+};
 
 
 
@@ -207,6 +227,16 @@ jcTerminal_Color jcTerminalGetBackgroundColor(jcTerminal* _terminal, int _x, int
 	return _col;
 };
 
+
+
+void jcTerminalPut(jcTerminal* _terminal, int _x, int _y, unsigned short _tindex)
+{
+
+};
+unsigned short jcTerminalGet(jcTerminal* _terminal, int _x, int _y)
+{
+	return 0;
+};
 
 
 

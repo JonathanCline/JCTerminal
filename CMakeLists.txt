@@ -9,6 +9,9 @@ add_subdirectory("JCTerminal")
 
 
 
+set(JCTERMINAL_INSTALL_HEADERS_PATH "include")
+set(JCTERMINAL_INSTALL_STATIC_LIBS_PATH "lib")
+
 
 
 set(lib_dir "lib")
@@ -83,7 +86,7 @@ endif()
 
 if(NOT TARGET lodepng)
 	add_library(lodepng STATIC "${lib_dir}/lodepng/lodepng.h" "${lib_dir}/lodepng/lodepng.cpp")
-	target_include_directories(lodepng PUBLIC "lodepng")
+	target_include_directories(lodepng PUBLIC "${lib_dir}/lodepng")
 endif()
 
 

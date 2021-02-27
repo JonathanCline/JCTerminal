@@ -20,6 +20,12 @@ extern "C"
 
 
 	int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath);
+
+
+
+	int jcTerminalLoadPNG(jcTerminal* _terminal, const char* _path, unsigned short _setIndex);
+
+
 	
 	
 
@@ -38,6 +44,8 @@ extern "C"
 	jcTerminal_Color jcTerminalGetBackgroundColor(jcTerminal* _terminal, int _x, int _y);
 
 
+	void jcTerminalPut(jcTerminal* _terminal, int _x, int _y, unsigned short _tindex);
+	unsigned short jcTerminalGet(jcTerminal* _terminal, int _x, int _y);
 
 
 	void jcTerminalFillRect(jcTerminal* _terminal, int _x0, int _y0, int _x1, int _y1, jcTerminal_Color _color);

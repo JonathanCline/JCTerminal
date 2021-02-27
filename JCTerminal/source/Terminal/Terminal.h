@@ -4,6 +4,9 @@
 #include "Settings/Settings.h"
 #include "Text/Font.h"
 #include "CellBuffer/CellBuffer.h"
+#include "Texture/Texture.h"
+
+
 
 #include <unordered_map>
 #include <filesystem>
@@ -35,6 +38,10 @@ public:
 	auto& cell_buffer() noexcept { return this->cellbuffer_; };
 	const auto& cell_buffer() const noexcept { return this->cellbuffer_; };
 
+	
+
+
+
 	jcTerminal() = default;
 	~jcTerminal();
 
@@ -47,6 +54,8 @@ private:
 	jct::CallbackLedger callbacks_{};
 
 	jct::CellBuffer cellbuffer_{};
+
+
 
 
 };

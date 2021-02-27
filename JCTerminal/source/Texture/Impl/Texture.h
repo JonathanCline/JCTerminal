@@ -7,7 +7,7 @@
 #include <numeric>
 #include <initializer_list>
 
-namespace sf::client
+namespace jct::tx
 {
 	enum TEXTURE_ENCODING_E
 	{
@@ -272,6 +272,10 @@ namespace sf::client
 		container_type data_{};
 
 	};
+
+
+
+
 
 
 };

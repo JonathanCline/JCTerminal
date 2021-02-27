@@ -79,11 +79,14 @@ int main()
 	auto _hackIndex = jcTerminalLoadFont(_terminal, hack_font_path_v);
 
 	jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
-	
 
 	jcTerminalFillRect(_terminal, 4, 4, 12, 16, dared_color);
 	jcTerminalRefresh(_terminal);
 
+
+
+	auto _lpngResult = jcTerminalLoadPNG(_terminal, SOURCE_ROOT "/Untitled.png", 420);
+	assert(_lpngResult == 0);
 
 
 	while (keep_refreshing_terminal_v)
