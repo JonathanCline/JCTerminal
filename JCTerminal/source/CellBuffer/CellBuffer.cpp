@@ -45,11 +45,14 @@ in vec4 background_col;
 
 out vec4 color;
 
+// Regular texture sheet
+
+uniform sampler2DArray textureSheet;
+
 void main() 
 {
-
-	color = foreground_col;
-
+	vec4 tsheetTexel = texture(textureSheet, uvs).rgba;
+	color = tsheetTexel * foreground_col;
 };
 )";
 
@@ -77,9 +80,9 @@ namespace jct
 				glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
 				glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 				if (InfoLogLength > 0) {
-					//std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-					//glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-					//printf("%s\n", &VertexShaderErrorMessage[0]);
+					std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
+					glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
+					printf("%s\n", &VertexShaderErrorMessage[0]);
 
 					return 0;
 				}
@@ -94,9 +97,9 @@ namespace jct
 				glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
 				glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 				if (InfoLogLength > 0) {
-					//std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-					//glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-					//printf("%s\n", &FragmentShaderErrorMessage[0]);
+					std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
+					glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
+					printf("%s\n", &FragmentShaderErrorMessage[0]);
 
 					return 0;
 				}
@@ -111,9 +114,9 @@ namespace jct
 				glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
 				glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 				if (InfoLogLength > 0) {
-					//std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-					//glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-					//printf("%s\n", &ProgramErrorMessage[0]);
+					std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
+					glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
+					printf("%s\n", &ProgramErrorMessage[0]);
 
 					return 0;
 
@@ -148,12 +151,37 @@ namespace jct
 	
 	bool CellBuffer::initialize()
 	{
+		auto _err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
+
 		this->shader_ = build_shader_program_from_source(CELL_BUFFER_VERTEX_SHADER_V, CELL_BUFFER_FRAGMENT_SHADER_V);
+
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
+
 		this->projection_uniform_ = glGetUniformLocation(this->shader_, "ProjectionMatrix");
+
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
 
 		auto& _vao = this->vao_;
 		glGenVertexArrays(1, &_vao);
 		glBindVertexArray(_vao);
+
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
 
 		auto& _vbo = this->vbo_;
 		glGenBuffers(1, &_vbo);
@@ -163,6 +191,13 @@ namespace jct
 		glEnableVertexAttribArray(0);
 		glBufferData(GL_ARRAY_BUFFER, _vertexData.size() * sizeof(float_t), _vertexData.data(), GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
 
 		auto& _ibo = this->ibo_;
 		glGenBuffers(1, &_ibo);
@@ -185,6 +220,8 @@ namespace jct
 		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(InstanceData), (void*)(sizeof(uint16_t) * 4));
 		glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(InstanceData), (void*)((sizeof(uint16_t) * 4) + (sizeof(uint8_t) * 4)));
 
+
+
 		glVertexAttribDivisor(1, 1);
 		glVertexAttribDivisor(2, 1);
 		glVertexAttribDivisor(3, 1);
@@ -192,22 +229,48 @@ namespace jct
 		glBindVertexArray(0);
 		this->update_projection_matrix();
 		
+
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
+
 		return true;
 	};
 	void CellBuffer::rebuffer_data()
 	{
+		auto _err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
+
 		auto& _instanceVBO = this->instance_buffer_id_;
+		
 		glBindBuffer(GL_ARRAY_BUFFER, _instanceVBO);
+		
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
 
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
-		glEnableVertexAttribArray(3);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData) * this->size(), this->get_instance_data().data());
+		
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
+	
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData) * this->size(), this->get_instance_data().data(), GL_STATIC_DRAW);
+		_err = glGetError();
+		if (_err != GL_NO_ERROR)
+		{
+			assert(false);
+		};
 
-		glVertexAttribPointer(1, 4, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(InstanceData), 0);
-		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(InstanceData), (void*)(sizeof(uint16_t) * 4));
-		glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(InstanceData), (void*)((sizeof(uint16_t) * 4) + (sizeof(uint8_t) * 4)));
 	};
 
 	void CellBuffer::destroy()
@@ -240,8 +303,11 @@ namespace jct
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ibo_);
 		glUniformMatrix4fv(this->projection_uniform_, 1, GL_FALSE, &this->projection_[0][0]);
 
+		this->gl_texture().bind();
+
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0, this->size());
 
+		this->gl_texture().unbind();
 		glBindVertexArray(0);
 	};
 
@@ -264,9 +330,14 @@ namespace jct
 			};
 		};
 
-		glBindVertexArray(this->vao_);
-		this->rebuffer_data();
-		glBindVertexArray(0);
+		if (this->vao_ != 0)
+		{
+
+			glBindVertexArray(this->vao_);
+			this->rebuffer_data();
+			glBindVertexArray(0);
+
+		};
 
 		this->update_projection_matrix();
 	};

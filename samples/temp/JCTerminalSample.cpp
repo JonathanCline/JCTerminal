@@ -12,14 +12,15 @@ constexpr auto hack_font_path_v = SOURCE_ROOT "/../../assets/fonts/Hack/Hack-Reg
 
 bool keep_refreshing_terminal_v = true;
 
-const int screen_width = 48;
-const int screen_height = 32;
+const int screen_width = 32;
+const int screen_height = 24;
 
 int pos_x = 0;
 int pos_y = 0;
 
-const ColorRGBA default_color{ 255, 255, 255, 255 };
-const ColorRGBA square_color{ 255, 0, 0, 255 };
+const jcTerminal_Color default_color{ 255, 255, 255, 255 };
+const jcTerminal_Color square_color{ 255, 0, 0, 255 };
+const jcTerminal_Color dared_color{ 80, 10, 0, 255 };
 
 void tclose_callback(jcTerminal* _terminal)
 {
@@ -33,56 +34,62 @@ void tkey_callback(jcTerminal* _terminal, jcTerminal_Key _key, jcTerminal_Action
 	case JCT_KEY_W:
 		if (pos_y > 0)
 		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 0);
 			--pos_y;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 1);
 		};
 		break;
 	case JCT_KEY_A:
 		if (pos_x > 0)
 		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 0);
 			--pos_x;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 1);
 		};
 		break;
 	case JCT_KEY_S:
 		if (pos_y + 1 < screen_height)
 		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 0);
 			++pos_y;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 1);
 		};
 		break;
 	case JCT_KEY_D:
 		if (pos_x + 1 < screen_width)
 		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 0);
 			++pos_x;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
+			jcTerminalPut(_terminal, pos_x, pos_y, 1);
 		};
 		break;
 	default:
 		break;
 	};
+	jcTerminalRefresh(_terminal);
 };
 
 int main()
 {
 	auto _terminal = jcTerminalOpen(screen_width, screen_height, "nosegay");
-	jcTerminalSetCellSize(_terminal, 16, 16);
+	jcTerminalSetCellSize(_terminal, 32, 32);
 
 	jcTerminalSetCloseCallback(_terminal, tclose_callback);
-	jcTerminalKeyCallback(_terminal, tkey_callback);
+	jcTerminalSetKeyCallback(_terminal, tkey_callback);
 
 	auto _hackIndex = jcTerminalLoadFont(_terminal, hack_font_path_v);
 
-	jcTerminalRefresh(_terminal);
-	jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
+	jcTerminalPut(_terminal, pos_x, pos_y, 1);
 
-	while (keep_refreshing_terminal_v)
+	jcTerminalFillRect(_terminal, 4, 4, 12, 16, dared_color);
+	jcTerminalRefresh(_terminal);
+
+	auto _lpngResult = jcTerminalLoadPNG(_terminal, SOURCE_ROOT "/Untitled.png", 1);
+	assert(_lpngResult == 0);
+
+	while (keep_refreshing_terminal_v) 
 	{
-		jcTerminalRefresh(_terminal);
+		jcTerminalDrawUntilEvent(_terminal);
 	};
 
 	jcTerminalClose(&_terminal);

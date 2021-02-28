@@ -7,7 +7,7 @@
 #include <numeric>
 #include <initializer_list>
 
-namespace sf::client
+namespace jct::tx
 {
 	enum TEXTURE_ENCODING_E
 	{
@@ -233,10 +233,9 @@ namespace sf::client
 			assert(this->dim_size() == (_width * _height));
 
 			auto _outIter = this->begin();
-#ifndef NDEBUG
 			const auto _outEndIter = this->end();
-#endif
-			for (_iter; _iter < _endIter; _iter = std::next(_iter, _oldWidth), _outIter = std::next(_outIter, _width))
+
+			for (_iter; _iter < _endIter && _outIter < _outEndIter; _iter = std::next(_iter, _oldWidth), _outIter = std::next(_outIter, _width))
 			{
 				assert(_outIter < _outEndIter);
 				std::copy_n(_iter, _oldWidth, _outIter);
@@ -272,6 +271,10 @@ namespace sf::client
 		container_type data_{};
 
 	};
+
+
+
+
 
 
 };

@@ -37,11 +37,10 @@ add_subdirectory("source/Callback")
 add_subdirectory("source/CellBuffer")
 add_subdirectory("source/Color")
 add_subdirectory("source/Interface")
+add_subdirectory("source/Opengl")
 add_subdirectory("source/Settings")
 add_subdirectory("source/Terminal")
 add_subdirectory("source/Text")
+add_subdirectory("source/Texture")
 add_subdirectory("source/Window")
-
-
-
 

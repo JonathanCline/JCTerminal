@@ -11,27 +11,53 @@ extern "C"
 	void jcTerminalRefresh(jcTerminal* _terminal);
 	void jcTerminalClose(jcTerminal** _terminal);
 
-	void jcTerminalGetCellSize(jcTerminal* _terminal, int* _width, int* _height);
+
+	void jcTerminalDraw(jcTerminal* _terminal);
+	void jcTerminalDrawUntilEvent(jcTerminal* _terminal, double _timeoutSeconds = 0.100);
+
+
+	void jcTerminalGetCellSize(const jcTerminal* _terminal, int* _width, int* _height);
 	void jcTerminalSetCellSize(jcTerminal* _terminal, int _width, int _height);
 
-	void jcTerminalGetWindowSize(jcTerminal* _terminal, int* _widthCells, int* _heightCells);
+	void jcTerminalGetWindowSize(const jcTerminal* _terminal, int* _widthCells, int* _heightCells);
 	void jcTerminalSetWindowSize(jcTerminal* _terminal, int _widthCells, int _heightCells);
 
 
 
+	int jcTerminalGetMaxTextureCount();
+
 	int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath);
+	int jcTerminalLoadPNG(jcTerminal* _terminal, const char* _path, unsigned short _setIndex);
+
+
+
+
+
+
+	
 	
 
-
-	struct ColorRGBA
+	struct jcTerminal_Color
 	{
 		unsigned char r = 0;
 		unsigned char g = 0;
 		unsigned char b = 0;
-		unsigned char a = 0;
+		unsigned char a = 0;	
 	};
 
-	void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, ColorRGBA _color);
+	void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color);
+	jcTerminal_Color jcTerminalGetColor(const jcTerminal* _terminal, int _x, int _y);
+
+	void jcTerminalSetBackgroundColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color);
+	jcTerminal_Color jcTerminalGetBackgroundColor(const jcTerminal* _terminal, int _x, int _y);
+
+	void jcTerminalPut(jcTerminal* _terminal, int _x, int _y, unsigned short _tindex);
+	unsigned short jcTerminalGet(const jcTerminal* _terminal, int _x, int _y);
+
+
+	void jcTerminalFillRect(jcTerminal* _terminal, int _x0, int _y0, int _x1, int _y1, jcTerminal_Color _color);
+
+
 
 
 
@@ -59,16 +85,7 @@ extern "C"
 	};
 
 	typedef void(*jcTerminal_KeyCallback)(jcTerminal* _terminal, jcTerminal_Key _key, jcTerminal_Action _action);
-	void jcTerminalKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback);
-
-
-
-
-	
-
-	
-
-
+	void jcTerminalSetKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback);
 
 
 

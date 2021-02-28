@@ -4,6 +4,9 @@
 #include "Settings/Settings.h"
 #include "Text/Font.h"
 #include "CellBuffer/CellBuffer.h"
+#include "Texture/Texture.h"
+
+
 
 #include <unordered_map>
 #include <filesystem>
@@ -35,6 +38,17 @@ public:
 	auto& cell_buffer() noexcept { return this->cellbuffer_; };
 	const auto& cell_buffer() const noexcept { return this->cellbuffer_; };
 
+	
+
+	auto& texture_sheet() noexcept { return this->texture_sheet_; };
+	const auto& texture_sheet() const noexcept { return this->texture_sheet_; };
+
+	auto& mask_texture_sheet() noexcept { return this->mask_texture_sheet_; };
+	const auto& mask_texture_sheet() const noexcept { return this->mask_texture_sheet_; };
+
+	bool texture_needs_update_v = false;
+
+
 	jcTerminal() = default;
 	~jcTerminal();
 
@@ -47,6 +61,10 @@ private:
 	jct::CallbackLedger callbacks_{};
 
 	jct::CellBuffer cellbuffer_{};
+	
+	jct::Texture texture_sheet_{};
+	jct::MaskTexture mask_texture_sheet_{};
+
 
 
 };
