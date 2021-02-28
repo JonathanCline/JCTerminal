@@ -233,10 +233,9 @@ namespace jct::tx
 			assert(this->dim_size() == (_width * _height));
 
 			auto _outIter = this->begin();
-#ifndef NDEBUG
 			const auto _outEndIter = this->end();
-#endif
-			for (_iter; _iter < _endIter; _iter = std::next(_iter, _oldWidth), _outIter = std::next(_outIter, _width))
+
+			for (_iter; _iter < _endIter && _outIter < _outEndIter; _iter = std::next(_iter, _oldWidth), _outIter = std::next(_outIter, _width))
 			{
 				assert(_outIter < _outEndIter);
 				std::copy_n(_iter, _oldWidth, _outIter);

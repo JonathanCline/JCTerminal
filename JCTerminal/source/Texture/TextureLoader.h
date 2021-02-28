@@ -21,6 +21,8 @@ namespace jct
 
 
 	std::optional<Texture> load_texture_png(const std::filesystem::path& _path);
+	bool save_texture_png(const Texture& _texture, const std::filesystem::path& _path);
+
 
 
 

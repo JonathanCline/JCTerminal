@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Color/Color.h"
+#include "Texture/GLTextureSheet.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -17,6 +18,7 @@ namespace jct
 	class CellBuffer
 	{
 	private:
+
 		auto& get_instance_data() noexcept { return this->instance_buffer_; };
 		const auto& get_instance_data() const noexcept { return this->instance_buffer_; };
 
@@ -26,6 +28,7 @@ namespace jct
 		void update_projection_matrix();
 
 	public:
+
 		bool initialize();
 
 		struct InstanceData
@@ -41,6 +44,9 @@ namespace jct
 		size_t width() const noexcept { return this->width_; };
 		size_t height() const noexcept { return this->height_; };
 		size_t size() const noexcept { return this->width() * this->height(); };
+
+		auto& gl_texture() noexcept { return this->texture_sheet_; };
+		const auto& gl_texture() const noexcept { return this->texture_sheet_; };
 
 
 		size_t to_index(uint16_t _x, uint16_t _y) const noexcept { return (_y * this->width()) + _x; };
@@ -63,6 +69,8 @@ namespace jct
 
 	private:
 		GLuint shader_ = 0;
+
+		gl::GLTextureSheet texture_sheet_{};
 
 		GLuint projection_uniform_ = 0;
 		glm::mat4 projection_{ 1.0f };

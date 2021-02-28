@@ -40,6 +40,13 @@ public:
 
 	
 
+	auto& texture_sheet() noexcept { return this->texture_sheet_; };
+	const auto& texture_sheet() const noexcept { return this->texture_sheet_; };
+
+	auto& mask_texture_sheet() noexcept { return this->mask_texture_sheet_; };
+	const auto& mask_texture_sheet() const noexcept { return this->mask_texture_sheet_; };
+
+	bool texture_needs_update_v = false;
 
 
 	jcTerminal() = default;
@@ -54,7 +61,9 @@ private:
 	jct::CallbackLedger callbacks_{};
 
 	jct::CellBuffer cellbuffer_{};
-
+	
+	jct::Texture texture_sheet_{};
+	jct::MaskTexture mask_texture_sheet_{};
 
 
 

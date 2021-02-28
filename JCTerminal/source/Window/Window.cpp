@@ -1,6 +1,7 @@
 #include "Window.h"
 
 #include "Terminal/Terminal.h"
+#include "Opengl/Opengl.h"
 
 #include <GLFW/glfw3.h>
 #include <cassert>
@@ -125,6 +126,9 @@ namespace jct
 		auto& _window = _terminal->window();
 
 		glfwSetWindowSize(_window, (int)_width, (int)_height);
+
+		auto& _tsheet = _terminal->texture_sheet();
+		_tsheet.resize(_st.cell_width, _st.cell_height * gl::max_texture_layers(), { 255, 255, 255, 0 });
 
 	};
 

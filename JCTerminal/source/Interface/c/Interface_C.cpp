@@ -8,6 +8,7 @@
 #include "Window/Window.h"
 #include "Text/FontList.h"
 #include "Texture/TextureLoader.h"
+#include "Opengl/Opengl.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -27,6 +28,7 @@ namespace
 	}();
 };
 
+
 jcTerminal* jcTerminalOpen(int _widthCells, int _heightCells, const char* _title)
 {
 	auto _res = glfwInit();
@@ -35,25 +37,47 @@ jcTerminal* jcTerminalOpen(int _widthCells, int _heightCells, const char* _title
 	auto* _terminal = new jcTerminal{};
 	assert(_terminal);
 
+
 	auto& _st = _terminal->settings();
 	_st.cells_x = _widthCells;
 	_st.cells_y = _heightCells;
 	_st.title = _title;
 
+
 	auto _result = jct::open_terminal_window(_terminal);
 	assert(_result);
+
 
 	auto& _window = _terminal->window();
 	assert(_window);
 	glfwMakeContextCurrent(_window);
 	
+
 	_res = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	assert(_res == 1);
+
+
+
+	auto& _tsheet = _terminal->texture_sheet();
+	const auto _texLayers = jct::gl::max_texture_layers();
+	const auto _texLayerSize = jct::gl::max_texture_layer_size(_terminal);
+	_tsheet.resize(_texLayerSize.first, _texLayerSize.second * _texLayers);
+
+
 
 	auto& _cellBuffer = _terminal->cell_buffer();
 	_cellBuffer.resize(_st.cells_x, _st.cells_y);
 	auto _goodInit = _cellBuffer.initialize();
 	assert(_goodInit);
+
+
+
+	auto& _glTex = _cellBuffer.gl_texture();
+	const auto _goodTexture = _glTex.initialize();
+	assert(_goodTexture);
+
+
+	_glTex.assign(_tsheet, _texLayers);
 
 	return _terminal;
 };
@@ -61,16 +85,18 @@ void jcTerminalRefresh(jcTerminal* _terminal)
 {
 	assert(_terminal);
 
-	auto& _window = _terminal->window();
-	assert(_window);
+	auto& _cb = _terminal->cell_buffer();
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	// Update gl texture
+	if (_terminal->texture_needs_update_v)
+	{
+		const auto& _textureSheet = _terminal->texture_sheet();
+		_cb.gl_texture().assign(_textureSheet, jct::gl::max_texture_layers());
+		_terminal->texture_needs_update_v = false;
+	};
 
-	auto& _cellBuffer = _terminal->cell_buffer();
-	_cellBuffer.draw();
-
-	glfwSwapBuffers(_window);
-	glfwPollEvents();
+	// Update cell buffer
+	_cb.update();
 
 };
 void jcTerminalClose(jcTerminal** _terminalPtr)
@@ -91,7 +117,47 @@ void jcTerminalClose(jcTerminal** _terminalPtr)
 	};
 };
 
-void jcTerminalGetCellSize(jcTerminal* _terminal, int* _width, int* _height)
+namespace
+{
+
+
+	void draw_terminal(jcTerminal* _terminal)
+	{
+		assert(_terminal);
+
+		auto& _window = _terminal->window();
+		assert(_window);
+
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		auto& _cellBuffer = _terminal->cell_buffer();
+		_cellBuffer.draw();
+
+		glfwSwapBuffers(_window);
+	};
+
+
+
+};
+
+
+
+void jcTerminalDraw(jcTerminal* _terminal)
+{
+	assert(_terminal);
+	draw_terminal(_terminal);
+	glfwPollEvents();
+};
+void jcTerminalDrawUntilEvent(jcTerminal* _terminal, double _timeoutSeconds)
+{
+	assert(_terminal);
+	draw_terminal(_terminal);
+	glfwWaitEventsTimeout(_timeoutSeconds);
+};
+
+
+
+void jcTerminalGetCellSize(const jcTerminal* _terminal, int* _width, int* _height)
 {
 	assert(_terminal);
 	auto& _st = _terminal->settings();
@@ -107,7 +173,7 @@ void jcTerminalSetCellSize(jcTerminal* _terminal, int _width, int _height)
 	jct::refresh_window_size(_terminal);
 };
 
-void jcTerminalGetWindowSize(jcTerminal* _terminal, int* _widthCells, int* _heightCells)
+void jcTerminalGetWindowSize(const jcTerminal* _terminal, int* _widthCells, int* _heightCells)
 {
 	assert(_terminal);
 	auto& _st = _terminal->settings();
@@ -129,6 +195,13 @@ void jcTerminalSetWindowSize(jcTerminal* _terminal, int _widthCells, int _height
 
 
 
+int jcTerminalGetMaxTextureCount()
+{
+	return jct::gl::max_texture_layers();
+};
+
+
+
 int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath)
 {
 	assert(_terminal);
@@ -137,9 +210,11 @@ int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath)
 	jct::FontPath _path{ _fontPath };
 	constexpr auto _fontSizes = DEFAULT_FONT_SIZES_V;
 	auto _fontIndex = jct::load_font_from_disk(_path, _fontSizes.data(), _fontSizes.data() + _fontSizes.size());
+
+	_terminal->texture_needs_update_v = true;
+
 	return _fontIndex;
 };
-
 int jcTerminalLoadPNG(jcTerminal* _terminal, const char* _path, unsigned short _setIndex)
 {
 	const auto _fpath = std::filesystem::path{ _path };
@@ -156,12 +231,29 @@ int jcTerminalLoadPNG(jcTerminal* _terminal, const char* _path, unsigned short _
 	};
 
 
+	/*
+		Write the loaded texture into the texture sheet at the index requested
+	*/
+	
+	auto& _texture = *_texOpt;
+	auto& _textureSheet = _terminal->texture_sheet();
+
+	const auto _cellWidth = _terminal->settings().cell_width;
+	const auto _cellHeight = _terminal->settings().cell_height;
+
+	const auto _y0 = _cellHeight * _setIndex;
+
+	if (_texture.height() > _cellHeight || _texture.width() > _cellWidth) [[unlikely]]
+	{
+		_texture.resize(_cellHeight, _cellHeight);
+	};
+
+	_textureSheet.fill(0, _y0, _texture);
+
+	_terminal->texture_needs_update_v = true;
 
 	return 0;
 };
-
-
-
 
 
 
@@ -177,9 +269,8 @@ void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color 
 	_col.b = _color.b;
 	_col.a = _color.a;
 
-	_cellBuffer.update();
 };
-jcTerminal_Color jcTerminalGetColor(jcTerminal* _terminal, int _x, int _y)
+jcTerminal_Color jcTerminalGetColor(const jcTerminal* _terminal, int _x, int _y)
 {
 	assert(_terminal);
 	auto& _cellBuffer = _terminal->cell_buffer();
@@ -208,9 +299,8 @@ void jcTerminalSetBackgroundColor(jcTerminal* _terminal, int _x, int _y, jcTermi
 	_col.b = _color.b;
 	_col.a = _color.a;
 
-	_cellBuffer.update();
 };
-jcTerminal_Color jcTerminalGetBackgroundColor(jcTerminal* _terminal, int _x, int _y)
+jcTerminal_Color jcTerminalGetBackgroundColor(const jcTerminal* _terminal, int _x, int _y)
 {
 	assert(_terminal);
 	auto& _cellBuffer = _terminal->cell_buffer();
@@ -231,11 +321,14 @@ jcTerminal_Color jcTerminalGetBackgroundColor(jcTerminal* _terminal, int _x, int
 
 void jcTerminalPut(jcTerminal* _terminal, int _x, int _y, unsigned short _tindex)
 {
-
+	assert(_terminal);
+	_terminal->cell_buffer().at(_x, _y).layer = _tindex;
 };
-unsigned short jcTerminalGet(jcTerminal* _terminal, int _x, int _y)
+unsigned short jcTerminalGet(const jcTerminal* _terminal, int _x, int _y)
 {
-	return 0;
+	assert(_terminal);
+	auto _index = _terminal->cell_buffer().at(_x, _y).layer;
+	return _index;
 };
 
 
@@ -261,8 +354,6 @@ void jcTerminalFillRect(jcTerminal* _terminal, int _x0, int _y0, int _x1, int _y
 		};
 	};
 
-	_cb.update();
-
 };
 
 
@@ -277,7 +368,7 @@ void jcTerminalSetCloseCallback(jcTerminal* _terminal, jcTerminal_CloseCallback 
 	auto& _cbl = _terminal->callbacks();
 	_cbl.close_callback = _callback;
 };
-void jcTerminalKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback)
+void jcTerminalSetKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback)
 {
 	assert(_terminal);
 	auto& _cb = _terminal->callbacks();
