@@ -52,7 +52,8 @@ uniform sampler2DArray textureSheet;
 void main() 
 {
 	vec4 tsheetTexel = texture(textureSheet, uvs).rgba;
-	color = tsheetTexel * foreground_col;
+	vec4 fore = foreground_col * tsheetTexel;
+	color = mix(background_col, fore, fore.a);
 };
 )";
 
