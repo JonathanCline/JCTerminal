@@ -11,6 +11,7 @@ namespace jct
 	void glfw_close_callback(GLFWwindow* _window);
 	void glfw_resize_callback(GLFWwindow* _window, int _width, int _height);
 	void glfw_key_callback(GLFWwindow* _window, int _key, int _scancode, int _action, int _mods);
+	void glfw_text_callback(GLFWwindow* _window,  unsigned int _codepoint);
 
 
 

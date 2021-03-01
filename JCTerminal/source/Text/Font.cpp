@@ -33,7 +33,7 @@ namespace jct::text
 				.height = frac26_pixels{ _metrics.height },
 				.max_advance = frac26_pixels{ _metrics.max_advance },
 				.glyph_max_width = _out.max_advance,
-				.glyph_max_height = _out.height
+				.glyph_max_height = _out.ascender - _out.descender
 			};
 			
 			auto _h = pixels{ _out.height };
@@ -141,20 +141,24 @@ namespace jct::text
 		pixels{ (pixels::value_type)(_fontUnits.count() >> 6 ) }
 	{};
 
-	std::optional<TypeFace> load_typeface(const std::filesystem::path& _path, pixels _heightPx)
+	std::optional<TypeFace> load_typeface(const std::filesystem::path& _path, pixels _heightPx, size_t _glyphs)
 	{
 		FT_Face _face{};
 
 		auto _err = FT_New_Face(get_freetype_lib(), _path.string().c_str(), 0, &_face);
 		assert(!_err);
 
+
+		// _face.
+
 		_err = FT_Set_Pixel_Sizes(_face, 0, _heightPx.count());
 		assert(!_err);
 
 		const auto _faceMets = make_face_metrics(_face);
-		const auto _fHeight = pixels{ _faceMets.height };
+		const auto _fHeight = pixels{ _faceMets.glyph_max_height };
 
-		const auto _nGlyphs = _face->num_glyphs;
+
+		const auto _nGlyphs = ((_glyphs == 0)? _face->num_glyphs : std::min<size_t>(_glyphs, _face->num_glyphs));
 
 		TypeFace _tface{};
 		auto& _tfMets = _tface.metrics();
