@@ -372,8 +372,11 @@ void jcTerminalSetDefaultTextColor(jcTerminal* _terminal, jcTerminal_Color _text
 	_st.active_text_background_color = convert_color(_background);
 };
 
-void jcTerminalPrint(jcTerminal* _terminal, int _x, int _y, const char* _string, int _len)
+void jcTerminalPrint(jcTerminal* _terminal, int* _xptr, int* _yptr, const char* _string, int _len)
 {
+	auto& _x = *_xptr;
+	auto& _y = *_yptr;
+
 	assert(_terminal);
 	const auto _strlen = ((_len == 0) ? std::strlen(_string) : _len);
 	const auto _endPtr = _string + _strlen;
@@ -434,6 +437,10 @@ void jcTerminalPrint(jcTerminal* _terminal, int _x, int _y, const char* _string,
 		};
 	};
 };
+void jcTerminalPrintString(jcTerminal* _terminal, int _x, int _y, const char* _string, int _len)
+{
+	jcTerminalPrint(_terminal, &_x, &_y, _string, _len);
+};
 
 
 void jcTerminalFillRect(jcTerminal* _terminal, int _x0, int _y0, int _x1, int _y1, jcTerminal_Color _color)
@@ -473,6 +480,14 @@ void jcTerminalClear(jcTerminal* _terminal)
 
 
 
+bool jcTerminalGetKey(jcTerminal* _terminal, jcTerminal_Key _key)
+{
+	assert(_terminal);
+	auto _window = _terminal->window();
+	assert(_window);
+	return glfwGetKey(_window, (int)_key);
+};
+
 
 
 void jcTerminalSetCloseCallback(jcTerminal* _terminal, jcTerminal_CloseCallback _callback)
@@ -492,6 +507,7 @@ void jcTerminalSetTextCallback(jcTerminal* _terminal, jcTerminal_TextCallback _c
 	assert(_terminal);
 	_terminal->callbacks().text_callback = _callback;
 };
+
 
 
 

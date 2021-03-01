@@ -62,7 +62,6 @@ namespace jct
 
 
 
-
 	void register_glfw_callbacks(GLFWwindow* _window)
 	{
 		glfwSetWindowCloseCallback(_window, glfw_close_callback);

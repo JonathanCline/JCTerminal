@@ -58,8 +58,10 @@ extern "C"
 	void jcTerminalSetDefaultTextColor(jcTerminal* _terminal, jcTerminal_Color _textCol, jcTerminal_Color _background);
 
 	// If _len is set to 0, string length will be calculated using strlen()
-	void jcTerminalPrint(jcTerminal* _terminal, int _x, int _y, const char* _string, int _len = 0);
+	void jcTerminalPrint(jcTerminal* _terminal, int* _x, int* _y, const char* _string, int _len = 0);
 
+	// Same as jcTerminalPrint but does not provide a way of seeing where the cursor finished
+	void jcTerminalPrintString(jcTerminal* _terminal, int _x, int _y, const char* _string, int _len = 0);
 
 
 
@@ -82,11 +84,45 @@ extern "C"
 
 	enum jcTerminal_Key
 	{
+		JCT_KEY_0 = 48,
+		JCT_KEY_1,
+		JCT_KEY_2,
+		JCT_KEY_3,
+		JCT_KEY_4,
+		JCT_KEY_5,
+		JCT_KEY_6,
+		JCT_KEY_7,
+		JCT_KEY_8,
+		JCT_KEY_9 = 57,
+
 		JCT_KEY_W = 87,
 		JCT_KEY_A = 65,
 		JCT_KEY_S = 83,
-		JCT_KEY_D = 68
+		JCT_KEY_D = 68,
+
+		JCT_KEY_LEFT_BRACKET = 91,
+		JCT_KEY_RIGHT_BRACKET = 93,
+
+		JCT_KEY_ESCAPE = 256,
+		JCT_KEY_ENTER = 257,
+		JCT_KEY_TAB = 258,
+		JCT_KEY_BACKSPACE = 259,
+
+		JCT_KEY_LEFT = 263,
+		JCT_KEY_RIGHT = 262,
+		JCT_KEY_UP = 265,
+		JCT_KEY_DOWN = 264,
+
+		JCT_KEY_CAPS_LOCK = 280,
+
+		JCT_KEY_LEFT_SHIFT = 340,
+		JCT_KEY_LEFT_CONTROL = 341,
+		JCT_KEY_RIGHT_SHIFT = 344,
+		JCT_KEY_RIGHT_CONTROL = 345,
+
 	};
+
+
 
 	enum jcTerminal_Action
 	{
@@ -97,6 +133,9 @@ extern "C"
 
 	typedef void(*jcTerminal_KeyCallback)(jcTerminal* _terminal, jcTerminal_Key _key, jcTerminal_Action _action);
 	void jcTerminalSetKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback);
+
+	// Returns true if key is currently pressed
+	bool jcTerminalGetKey(jcTerminal* _terminal, jcTerminal_Key _key);
 
 
 

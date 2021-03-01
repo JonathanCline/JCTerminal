@@ -18,24 +18,51 @@ const int screen_height = 48;
 const jcTerminal_Color text_color{ 255, 0, 100, 255 };
 const jcTerminal_Color text_background_color{ 0, 0, 0, 255 };
 
+
+
+
+std::string user_input = "";
+const int user_input_x = 4;
+const int user_input_y = 4;
+
+int cursor_x = user_input_x;
+int cursor_y = user_input_y;
+
 void tclose_callback(jcTerminal* _terminal)
 {
 	keep_refreshing_terminal_v = false;
 };
 void tkey_callback(jcTerminal* _terminal, jcTerminal_Key _key, jcTerminal_Action _action)
 {
-	
+	switch (_key)
+	{
+	case JCT_KEY_BACKSPACE:
+		switch (_action)
+		{
+		case JCT_REPEAT: [[fallthrough]];
+		case JCT_PRESS:
+			if (!user_input.empty())
+			{
+				--cursor_x;
+				jcTerminalPut(_terminal, cursor_x, cursor_y, 0);
+				user_input.pop_back();
+			};
+			break;
+		default:
+			break;
+		};
+		break;
+	default:
+		break;
+	};
 };
-
-
-std::string user_input = "";
-int user_input_x = 4;
-int user_input_y = 4;
 
 void ttext_callback(jcTerminal* _terminal, unsigned short _codepoint)
 {
 	user_input.push_back(_codepoint);
-	jcTerminalPrint(_terminal, user_input_x, user_input_y, user_input.c_str(), user_input.size());
+	cursor_x = user_input_x;
+	cursor_y = user_input_y;
+	jcTerminalPrint(_terminal, &cursor_x, &cursor_y, user_input.c_str(), user_input.size());
 	jcTerminalRefresh(_terminal);
 };
 
@@ -54,7 +81,7 @@ int main()
 	jcTerminalRefresh(_terminal);
 	
 	jcTerminalSetDefaultTextColor(_terminal, text_color, text_background_color);
-	jcTerminalPrint(_terminal, 1, 1, "Makin Pancakes got big gay");
+	jcTerminalPrintString(_terminal, 1, 1, "Makin Pancakes got big gay");
 	jcTerminalRefresh(_terminal);
 
 	jcTerminalPut(_terminal, 10, 10, 1420);
@@ -64,7 +91,8 @@ int main()
 
 	while (keep_refreshing_terminal_v) 
 	{
-		jcTerminalDrawUntilEvent(_terminal);
+		jcTerminalDrawUntilEvent(_terminal, 0.5);
+		jcTerminalRefresh(_terminal);
 	};
 
 	jcTerminalClose(&_terminal);
