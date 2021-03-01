@@ -14,3 +14,4 @@ jcTerminal::~jcTerminal()
 	};
 	assert(this->window() == nullptr);
 };
+

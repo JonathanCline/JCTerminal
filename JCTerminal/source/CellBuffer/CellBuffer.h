@@ -37,8 +37,8 @@ namespace jct
 			uint16_t y;
 			uint16_t z;
 			uint16_t layer;
-			ColorRGBA foreground;
-			ColorRGBA background;
+			ColorRGBA foreground{ 0, 0, 0, 255 };
+			ColorRGBA background{ 0, 0, 0, 255 };
 		};
 
 		size_t width() const noexcept { return this->width_; };
@@ -63,6 +63,7 @@ namespace jct
 		void update();
 		void draw();
 
+		//void clear(ColorRGBA _foreground)
 
 		CellBuffer();
 		~CellBuffer();

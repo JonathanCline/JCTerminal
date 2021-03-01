@@ -8,5 +8,6 @@ namespace jct
 	{
 		jcTerminal_CloseCallback close_callback{};
 		jcTerminal_KeyCallback key_callback{};
+		jcTerminal_TextCallback text_callback{};
 	};
 };

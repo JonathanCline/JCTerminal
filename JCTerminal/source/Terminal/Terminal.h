@@ -49,6 +49,7 @@ public:
 	bool texture_needs_update_v = false;
 
 
+
 	jcTerminal() = default;
 	~jcTerminal();
 
