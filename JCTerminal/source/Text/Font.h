@@ -141,7 +141,7 @@ namespace jct::text
 
 	};
 
-	std::optional<TypeFace> load_typeface(const std::filesystem::path& _path, pixels _heightPx);
+	std::optional<TypeFace> load_typeface(const std::filesystem::path& _path, pixels _heightPx, size_t _nGlyphs = 0);
 
 	class Font : sae::Decorate_Iterator<Font>
 	{

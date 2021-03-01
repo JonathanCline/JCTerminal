@@ -1,6 +1,7 @@
 #include "Window.h"
 
 #include "Terminal/Terminal.h"
+#include "Opengl/Opengl.h"
 
 #include <GLFW/glfw3.h>
 #include <cassert>
@@ -42,6 +43,19 @@ namespace jct
 		};
 
 	};
+	void glfw_text_callback(GLFWwindow* _window, unsigned int _codepoint)
+	{
+		assert(_window);
+		auto _terminal = get_window_terminal(_window);
+		assert(_terminal);
+
+		const auto& _cb = _terminal->callbacks();
+		if (_cb.text_callback)
+		{
+			std::invoke(_cb.text_callback, _terminal, (unsigned short)(_codepoint & 0xFFFF));
+		};
+
+	};
 
 
 
@@ -53,6 +67,7 @@ namespace jct
 	{
 		glfwSetWindowCloseCallback(_window, glfw_close_callback);
 		glfwSetKeyCallback(_window, glfw_key_callback);
+		glfwSetCharCallback(_window, glfw_text_callback);
 	};
 
 
@@ -126,6 +141,11 @@ namespace jct
 
 		glfwSetWindowSize(_window, (int)_width, (int)_height);
 
+		auto& _tsheet = _terminal->texture_sheet();
+		_tsheet.resize(_st.cell_width, _st.cell_height * gl::max_texture_layers(), { 0, 0, 0, 0 });
+
+		
+		
 	};
 
 

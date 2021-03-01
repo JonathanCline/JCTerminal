@@ -12,15 +12,11 @@ constexpr auto hack_font_path_v = SOURCE_ROOT "/../../assets/fonts/Hack/Hack-Reg
 
 bool keep_refreshing_terminal_v = true;
 
-const int screen_width = 48;
-const int screen_height = 32;
+const int screen_width = 96;
+const int screen_height = 48;
 
-int pos_x = 0;
-int pos_y = 0;
-
-const jcTerminal_Color default_color{ 255, 255, 255, 255 };
-const jcTerminal_Color square_color{ 255, 0, 0, 255 };
-const jcTerminal_Color dared_color{ 80, 10, 0, 255 };
+const jcTerminal_Color text_color{ 255, 0, 100, 255 };
+const jcTerminal_Color text_background_color{ 0, 0, 0, 255 };
 
 void tclose_callback(jcTerminal* _terminal)
 {
@@ -28,70 +24,47 @@ void tclose_callback(jcTerminal* _terminal)
 };
 void tkey_callback(jcTerminal* _terminal, jcTerminal_Key _key, jcTerminal_Action _action)
 {
-	if (_action == JCT_RELEASE) { return; };
-	switch (_key)
-	{
-	case JCT_KEY_W:
-		if (pos_y > 0)
-		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
-			--pos_y;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
-		};
-		break;
-	case JCT_KEY_A:
-		if (pos_x > 0)
-		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
-			--pos_x;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
-		};
-		break;
-	case JCT_KEY_S:
-		if (pos_y + 1 < screen_height)
-		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
-			++pos_y;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
-		};
-		break;
-	case JCT_KEY_D:
-		if (pos_x + 1 < screen_width)
-		{
-			jcTerminalSetColor(_terminal, pos_x, pos_y, default_color);
-			++pos_x;
-			jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
-		};
-		break;
-	default:
-		break;
-	};
+	
 };
+
+
+std::string user_input = "";
+int user_input_x = 4;
+int user_input_y = 4;
+
+void ttext_callback(jcTerminal* _terminal, unsigned short _codepoint)
+{
+	user_input.push_back(_codepoint);
+	jcTerminalPrint(_terminal, user_input_x, user_input_y, user_input.c_str(), user_input.size());
+	jcTerminalRefresh(_terminal);
+};
+
 
 int main()
 {
-	auto _terminal = jcTerminalOpen(screen_width, screen_height, "nosegay");
-	jcTerminalSetCellSize(_terminal, 16, 16);
+	auto _terminal = jcTerminalOpen(screen_width, screen_height, "Welcome to Chillis");
+	jcTerminalSetCellSize(_terminal, 10, 18);
 
 	jcTerminalSetCloseCallback(_terminal, tclose_callback);
-	jcTerminalKeyCallback(_terminal, tkey_callback);
+	jcTerminalSetKeyCallback(_terminal, tkey_callback);
+	jcTerminalSetTextCallback(_terminal, ttext_callback);
 
-	auto _hackIndex = jcTerminalLoadFont(_terminal, hack_font_path_v);
-
-	jcTerminalSetColor(_terminal, pos_x, pos_y, square_color);
-
-	jcTerminalFillRect(_terminal, 4, 4, 12, 16, dared_color);
+	auto _hackIndex = jcTerminalLoadFont(_terminal, hack_font_path_v, 0, 512);
+	jcTerminalLoadPNG(_terminal, SOURCE_ROOT "/Tree.png", 1420);
+	jcTerminalRefresh(_terminal);
+	
+	jcTerminalSetDefaultTextColor(_terminal, text_color, text_background_color);
+	jcTerminalPrint(_terminal, 1, 1, "Makin Pancakes got big gay");
 	jcTerminalRefresh(_terminal);
 
+	jcTerminalPut(_terminal, 10, 10, 1420);
+	jcTerminalPut(_terminal, 12, 10, 1420);
+	jcTerminalPut(_terminal, 14, 10, 1420);
+	jcTerminalRefresh(_terminal);
 
-
-	auto _lpngResult = jcTerminalLoadPNG(_terminal, SOURCE_ROOT "/Untitled.png", 420);
-	assert(_lpngResult == 0);
-
-
-	while (keep_refreshing_terminal_v)
+	while (keep_refreshing_terminal_v) 
 	{
-		jcTerminalRefresh(_terminal);
+		jcTerminalDrawUntilEvent(_terminal);
 	};
 
 	jcTerminalClose(&_terminal);

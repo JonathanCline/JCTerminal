@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Texture/Texture.h"
+
 #include <filesystem>
 #include <set>
 #include <optional>
@@ -54,7 +56,7 @@ namespace jct
 	};
 	
 	using FontSize = int;
-	FontIndex load_font_from_disk(const FontPath& _path, const FontSize* const  _sizeDataBegin, const FontSize* const _sizeDataEnd);
+	FontHandle load_font_from_disk(const FontPath& _path, const FontSize* const  _sizeDataBegin, const FontSize* const _sizeDataEnd, unsigned short _glyphs);
 
 	class FontLedger
 	{
@@ -107,5 +109,8 @@ namespace jct
 		container_type fonts_{};
 
 	};
+
+	// Returns number of glyphs written into texture
+	unsigned short load_font_into_texture(FontHandle _index, Texture& _texture, int _layerWidth, int _layerHeight, unsigned short _offset);
 
 }

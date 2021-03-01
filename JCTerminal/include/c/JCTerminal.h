@@ -11,19 +11,27 @@ extern "C"
 	void jcTerminalRefresh(jcTerminal* _terminal);
 	void jcTerminalClose(jcTerminal** _terminal);
 
-	void jcTerminalGetCellSize(jcTerminal* _terminal, int* _width, int* _height);
+
+	void jcTerminalDraw(jcTerminal* _terminal);
+	void jcTerminalDrawUntilEvent(jcTerminal* _terminal, double _timeoutSeconds = 0.100);
+
+
+	void jcTerminalGetCellSize(const jcTerminal* _terminal, int* _width, int* _height);
 	void jcTerminalSetCellSize(jcTerminal* _terminal, int _width, int _height);
 
-	void jcTerminalGetWindowSize(jcTerminal* _terminal, int* _widthCells, int* _heightCells);
+	void jcTerminalGetWindowSize(const jcTerminal* _terminal, int* _widthCells, int* _heightCells);
 	void jcTerminalSetWindowSize(jcTerminal* _terminal, int _widthCells, int _heightCells);
 
 
 
-	int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath);
+	int jcTerminalGetMaxTextureCount();
 
-
-
+	int jcTerminalLoadFont(jcTerminal* _terminal, const char* _fontPath, unsigned short _startIndex = 0, unsigned short _glyphs = 256);
 	int jcTerminalLoadPNG(jcTerminal* _terminal, const char* _path, unsigned short _setIndex);
+
+
+
+
 
 
 	
@@ -38,20 +46,28 @@ extern "C"
 	};
 
 	void jcTerminalSetColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color);
-	jcTerminal_Color jcTerminalGetColor(jcTerminal* _terminal, int _x, int _y);
+	jcTerminal_Color jcTerminalGetColor(const jcTerminal* _terminal, int _x, int _y);
 
 	void jcTerminalSetBackgroundColor(jcTerminal* _terminal, int _x, int _y, jcTerminal_Color _color);
-	jcTerminal_Color jcTerminalGetBackgroundColor(jcTerminal* _terminal, int _x, int _y);
-
+	jcTerminal_Color jcTerminalGetBackgroundColor(const jcTerminal* _terminal, int _x, int _y);
 
 	void jcTerminalPut(jcTerminal* _terminal, int _x, int _y, unsigned short _tindex);
-	unsigned short jcTerminalGet(jcTerminal* _terminal, int _x, int _y);
+	unsigned short jcTerminalGet(const jcTerminal* _terminal, int _x, int _y);
+
+
+	void jcTerminalSetDefaultTextColor(jcTerminal* _terminal, jcTerminal_Color _textCol, jcTerminal_Color _background);
+
+	// If _len is set to 0, string length will be calculated using strlen()
+	void jcTerminalPrint(jcTerminal* _terminal, int _x, int _y, const char* _string, int _len = 0);
+
+
 
 
 	void jcTerminalFillRect(jcTerminal* _terminal, int _x0, int _y0, int _x1, int _y1, jcTerminal_Color _color);
 
 
 
+	void jcTerminalClear(jcTerminal* _terminal);
 
 
 
@@ -59,6 +75,8 @@ extern "C"
 	typedef void(*jcTerminal_CloseCallback)(jcTerminal* _terminal);
 	void jcTerminalSetCloseCallback(jcTerminal* _terminal, jcTerminal_CloseCallback _callback);
 
+	typedef void(*jcTerminal_TextCallback)(jcTerminal* _terminal, unsigned short _codepoint);
+	void jcTerminalSetTextCallback(jcTerminal* _terminal, jcTerminal_TextCallback _callback);
 
 
 
@@ -78,16 +96,7 @@ extern "C"
 	};
 
 	typedef void(*jcTerminal_KeyCallback)(jcTerminal* _terminal, jcTerminal_Key _key, jcTerminal_Action _action);
-	void jcTerminalKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback);
-
-
-
-
-	
-
-	
-
-
+	void jcTerminalSetKeyCallback(jcTerminal* _terminal, jcTerminal_KeyCallback _callback);
 
 
 
