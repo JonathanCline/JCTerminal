@@ -235,12 +235,13 @@ namespace jct::tx
 			auto _outIter = this->begin();
 			const auto _outEndIter = this->end();
 
+			const auto _minWidth = std::min(_oldWidth, _width);
+
 			for (_iter; _iter < _endIter && _outIter < _outEndIter; _iter = std::next(_iter, _oldWidth), _outIter = std::next(_outIter, _width))
 			{
 				assert(_outIter < _outEndIter);
-				std::copy_n(_iter, _oldWidth, _outIter);
+				std::copy_n(_iter, _minWidth, _outIter);
 			};
-
 		};
 		void resize(const size_type _width, const size_type _height)
 		{
@@ -264,6 +265,11 @@ namespace jct::tx
 		explicit Texture(size_type _width, size_type _height) :
 			width_{ _width }, height_{ _height }, data_(_width* _height)
 		{};
+		explicit Texture(size_type _width, size_type _height, value_type _fill) :
+			width_{ _width }, height_{ _height }, data_(_width* _height)
+		{
+			std::fill(this->begin(), this->end(), _fill);
+		};
 
 	private:
 		size_type width_ = 0;
@@ -271,10 +277,5 @@ namespace jct::tx
 		container_type data_{};
 
 	};
-
-
-
-
-
 
 };
