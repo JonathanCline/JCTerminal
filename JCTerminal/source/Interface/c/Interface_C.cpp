@@ -16,6 +16,10 @@
 #include <cassert>
 #include <array>
 #include <numeric>
+#include <charconv>
+#include <string_view>
+#include <iostream>
+#include <type_traits>
 
 namespace
 {
@@ -372,6 +376,126 @@ void jcTerminalSetDefaultTextColor(jcTerminal* _terminal, jcTerminal_Color _text
 	_st.active_text_background_color = convert_color(_background);
 };
 
+namespace
+{
+	constexpr inline std::array<jcTerminal_Color, 8> vga_ansii_foreground_colors 
+	{
+		jcTerminal_Color{   0,   0,   0, 255 }, // Black
+		jcTerminal_Color{ 170,   0,   0, 255 },	// Red
+		jcTerminal_Color{   0, 170,   0, 255 }, // Green
+		jcTerminal_Color{ 170,  85,   0, 255 }, // Yellow
+		jcTerminal_Color{   0,   0, 170, 255 }, // Blue
+		jcTerminal_Color{ 170,   0, 170, 255 }, // Magenta
+		jcTerminal_Color{   0, 170, 170, 255 }, // Cyan
+		jcTerminal_Color{ 170, 170, 170, 255 }  // White
+	};
+
+	// Thanks to Vader for the below code : (coppied on 3/13/2021)
+	//	https://github.com/cpplibv/libv/blob/dev/src/libv/utility/parse_number.hpp
+	//
+	template <typename T> requires std::is_arithmetic_v<T>
+	constexpr inline T parse_number(std::string_view str, std::error_code& ec)
+	{
+		T value;
+
+		// C++20 Support Workaround: This branching could be removed once Clang/GCC implements from_chars to floating point types
+		// Implementation is expected to land with GCC 11.0
+		if constexpr (std::is_integral_v<T>)
+		{
+			std::from_chars_result result = std::from_chars(str.data(), str.data() + str.size(), value);
+			ec = std::make_error_code(result.ec);
+
+			if (!ec && result.ptr != (str.data() + str.size()))
+			{
+				ec = std::make_error_code(std::errc::invalid_argument);
+			};
+		}
+		else
+		{ // This branch will be removed
+			size_t pos = 0;
+
+			try
+			{
+				if constexpr (std::is_same_v<T, double>)
+				{
+					value = std::stof(std::string(str), &pos);
+				}
+				else {
+					value = std::stod(std::string(str), &pos);
+				}
+			}
+			catch (const std::invalid_argument& e)
+			{
+				// no conversion could be performed
+				ec = std::make_error_code(std::errc::invalid_argument);
+			}
+			catch (const std::out_of_range& e)
+			{
+				// the converted value would fall out of the range of the result type or if the underlying function sets errno
+				ec = std::make_error_code(std::errc::result_out_of_range);
+			};
+
+			if (pos != str.size())
+			{
+				ec = std::make_error_code(std::errc::invalid_argument);
+			};
+		};
+
+		return value;
+	};
+
+	void inline handle_ansii(jcTerminal* _terminal, const std::string_view& _sv)
+	{
+		bool _highIntensity = false;
+
+		enum AnsiiCodeType
+		{
+			cBadCode = 0,
+			cRegular,
+			cBold,
+			cUnderline,
+			cBackground
+		};
+
+		AnsiiCodeType _codeType = cBadCode;
+
+		int _colorCode = 0;
+		
+		size_t _colorCodeBegin = 0;
+		const auto _semicolonPos = _sv.find(';');
+		if (_semicolonPos != std::string_view::npos)
+		{
+			// you should get a house plant
+			// helps keep track of thyme
+
+			_colorCodeBegin += _semicolonPos + 1;
+
+		};
+		
+		const auto _colorCodeStr = _sv.substr(_colorCodeBegin, _sv.size() - _colorCodeBegin);
+		
+		std::error_code _ec{};
+		_colorCode = parse_number<decltype(_colorCode)>(_colorCodeStr, _ec);
+		if (_ec)
+		{
+			return;
+		};
+
+		if (_colorCode < 30 || _colorCode > 37)
+		{
+			return;
+		};
+		_colorCode -= 30;
+
+		const auto& _color = vga_ansii_foreground_colors.at((size_t)_colorCode);
+		
+		auto& _st = _terminal->settings();
+		_st.active_text_color = convert_color(_color);
+
+	};
+
+}
+
 void jcTerminalPrint(jcTerminal* _terminal, int* _xptr, int* _yptr, const char* _string, int _len)
 {
 	auto& _x = *_xptr;
@@ -384,8 +508,8 @@ void jcTerminalPrint(jcTerminal* _terminal, int* _xptr, int* _yptr, const char* 
 	const auto _beginX = _x;
 	const auto _beginY = _y;
 
-	const auto _color = _terminal->settings().active_text_color;
-	const auto _bgcolor = _terminal->settings().active_text_background_color;
+	auto _color = _terminal->settings().active_text_color;
+	auto _bgcolor = _terminal->settings().active_text_background_color;
 
 	auto& _cb = _terminal->cell_buffer();
 
@@ -409,6 +533,37 @@ void jcTerminalPrint(jcTerminal* _terminal, int* _xptr, int* _yptr, const char* 
 			break;
 		case '\r':
 			_x = _beginX;
+			break;
+		case '\033':
+		{
+			
+			const auto _next = c + 1;
+			if (_next != _endPtr && *_next == '[')
+			{
+				// Ansii color code time
+				const auto _mPtr = std::find(_next, _endPtr, 'm');
+				if (_mPtr == _endPtr)
+				{
+					// Ignore it
+					c++;
+					continue;
+				};
+				c += (_mPtr - _next) + 1;
+				
+				handle_ansii(_terminal, std::string_view{ _next + 1, _mPtr });
+			
+			};
+
+
+
+
+			_color = _terminal->settings().active_text_color;
+			_bgcolor = _terminal->settings().active_text_background_color;
+
+
+		}
+
+			//_x = _beginX;
 			break;
 		case '\b':
 			if (_x > _beginX)

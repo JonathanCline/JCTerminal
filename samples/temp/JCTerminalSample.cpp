@@ -15,7 +15,7 @@ bool keep_refreshing_terminal_v = true;
 const int screen_width = 96;
 const int screen_height = 48;
 
-const jcTerminal_Color text_color{ 255, 0, 100, 255 };
+const jcTerminal_Color text_color{ 40, 200, 40, 255 };
 const jcTerminal_Color text_background_color{ 0, 0, 0, 255 };
 
 
@@ -79,9 +79,9 @@ int main()
 	auto _hackIndex = jcTerminalLoadFont(_terminal, hack_font_path_v, 0, 512);
 	jcTerminalLoadPNG(_terminal, SOURCE_ROOT "/Tree.png", 1420);
 	jcTerminalRefresh(_terminal);
-	
+
 	jcTerminalSetDefaultTextColor(_terminal, text_color, text_background_color);
-	jcTerminalPrintString(_terminal, 1, 1, "Makin Pancakes got big gay");
+	jcTerminalPrintString(_terminal, 1, 1, "Makin Pancakes got \033[0;33mbig gay");
 	jcTerminalRefresh(_terminal);
 
 	jcTerminalPut(_terminal, 10, 10, 1420);

@@ -57,7 +57,7 @@ extern "C"
 
 	void jcTerminalSetDefaultTextColor(jcTerminal* _terminal, jcTerminal_Color _textCol, jcTerminal_Color _background);
 
-	// If _len is set to 0, string length will be calculated using strlen()
+	// If _len is set to 0, string length will be calculated using strlen(). Applies formatting
 	void jcTerminalPrint(jcTerminal* _terminal, int* _x, int* _y, const char* _string, int _len = 0);
 
 	// Same as jcTerminalPrint but does not provide a way of seeing where the cursor finished
